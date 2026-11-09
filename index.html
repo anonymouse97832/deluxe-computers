@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeluxePOS Pro Ultimate</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- LOCATION SELECT SCREEN -->
+  <section id="locationScreen" class="screen center-screen">
+    <div class="login-card">
+      <div class="brand-mark">D</div>
+      <h1>DeluxePOS</h1>
+      <p>SELECT YOUR WORKING LOCATION</p>
+      <div class="location-buttons">
+        <button type="button" id="btnSelectStore" onclick="window.selectLocation('STORE')">STORE / GODOWN</button>
+        <button type="button" id="btnSelectShop" onclick="window.selectLocation('SHOP')">SHOP</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGIN SCREEN -->
+  <section id="loginScreen" class="screen center-screen hidden">
+    <form id="loginForm" class="login-card" onsubmit="window.handleLogin(event)">
+      <div class="brand-mark">D</div>
+      <h1>DeluxePOS</h1>
+      <p id="loginLocation">LOGIN</p>
+      <label>ACCOUNT TYPE</label>
+      <select id="loginRole">
+        <option value="ADMIN">ADMIN</option>
+        <option value="CASHIER">CASHIER</option>
+      </select>
+      <label>USERNAME</label>
+      <input id="loginUsername" required autocomplete="username" value="ADMIN" placeholder="USERNAME">
+      <label>PASSWORD</label>
+      <input id="loginPassword" required type="password" autocomplete="current-password" value="123" placeholder="PASSWORD">
+      <p id="loginError" class="error"></p>
+      <button type="submit" id="btnLoginSubmit">LOGIN</button>
+      <button type="button" id="btnBackToLocation" class="button-muted" onclick="window.backToLocation()">BACK</button>
+    </form>
+  </section>
+
+  <!-- MAIN APP SHELL -->
+  <div id="appShell" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark small-mark">D</span>
+        <div><b>DELUXEPOS</b><small>POINT OF SALE</small></div>
+      </div>
+      <div class="user-info">
+        <b id="sideUser">USER</b>
+        <small id="sideMeta">ROLE</small>
+      </div>
+      <nav id="navigation">
+        <button type="button" class="nav-link" data-page="sale" onclick="window.navigate('sale')">NEW SALE / BILLING [<span class="key-lbl-sale">F1</span>]</button>
+        <button type="button" class="nav-link" data-page="returns" onclick="window.navigate('returns')">SALES RETURN [<span class="key-lbl-returns">F2</span>]</button>
+        <button type="button" class="nav-link" data-page="customerHistory" onclick="window.navigate('customerHistory')">CUSTOMER HISTORY [<span class="key-lbl-customerHistory">F3</span>]</button>
+        <button type="button" class="nav-link" data-page="transactions" onclick="window.navigate('transactions')">TRANSACTIONS [<span class="key-lbl-transactions">F4</span>]</button>
+        <button type="button" class="nav-link" data-page="duplicateBill" onclick="window.navigate('duplicateBill')">DUPLICATE BILL [<span class="key-lbl-duplicateBill">F5</span>]</button>
+        <button type="button" class="nav-link" data-page="reports" onclick="window.navigate('reports')">REPORTS CENTER</button>
+        <button type="button" class="nav-link" data-page="overview" onclick="window.navigate('overview')">DASHBOARD</button>
+        <button type="button" class="nav-link" data-page="stock" onclick="window.navigate('stock')">STOCK MANAGEMENT</button>
+        <button type="button" class="nav-link" data-page="inventory" onclick="window.navigate('inventory')">STOCK INVENTORY</button>
+        <button type="button" class="nav-link" data-page="receiving" onclick="window.navigate('receiving')">STOCK RECEIVING</button>
+        <button type="button" class="nav-link" data-page="transfer" onclick="window.navigate('transfer')">STOCK TRANSFER</button>
+        <button type="button" class="nav-link" data-page="khata" onclick="window.navigate('khata')">CUSTOMER KHATA</button>
+        <button type="button" class="nav-link" data-page="expenses" onclick="window.navigate('expenses')">DAILY EXPENSES</button>
+        <button type="button" class="nav-link" data-page="suppliers" onclick="window.navigate('suppliers')">SUPPLIERS</button>
+        <button type="button" class="nav-link" data-page="users" onclick="window.navigate('users')">MANAGE USERS</button>
+        <button type="button" class="nav-link" data-page="backup" onclick="window.navigate('backup')">BACKUP & RESTORE</button>
+        <button type="button" class="nav-link" data-page="settings" onclick="window.navigate('settings')">SETTINGS & SHORTCUTS</button>
+        <button type="button" class="nav-link" data-page="password" onclick="window.navigate('password')">CHANGE PASSWORD</button>
+      </nav>
+      <button type="button" id="btnLogout" class="logout-button" onclick="window.logout()">LOG OUT</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">BUSINESS MANAGEMENT</span>
+          <h2 id="pageTitle">NEW SALE / BILLING</h2>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div class="location-pill" id="topLocation">SHOP</div>
+          <button type="button" id="btnExportDbTop" class="button-muted" onclick="window.exportBackup()" style="padding:6px 12px; font-size:11px;">💾 EXPORT DATA (.JSON)</button>
+        </div>
+      </header>
+
+      <div id="page" class="page">
+        <!-- 1. NEW SALE / BILLING PAGE -->
+        <section id="salePage" class="page-section">
+          <div class="billing-layout">
+            <div class="panel billing-left">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>NEW SALE / BILLING</h3>
+                <span class="shortcut-badge">SHORTCUTS: [<span class="key-lbl-sale">F1</span>] SALE | [<span class="key-lbl-focusSearch">F8</span>] SEARCH | [<span class="key-lbl-completeSale">ALT+S</span>] SAVE</span>
+              </div>
+              <label>BARCODE / PRODUCT SEARCH [<span class="key-lbl-focusSearch">F8</span> FOCUS]</label>
+              <div class="billing-search-row">
+                <input id="barcodeSearch" placeholder="SCAN BARCODE OR TYPE PRODUCT NAME / MODEL" autocomplete="off" oninput="window.updateProductSearchResults()" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addToCart();}">
+                <button id="addToCartButton" type="button" onclick="window.addToCart()">+ ADD ITEM [ENTER]</button>
+              </div>
+              <div id="productSearchResults" class="product-search-results"></div>
+              
+              <div class="table-wrap billing-table">
+                <table>
+                  <thead>
+                    <tr><th>BARCODE</th><th>PRODUCT NAME</th><th>PRICE</th><th>QTY</th><th>TOTAL</th><th>ACTION</th></tr>
+                  </thead>
+                  <tbody id="cartTableBody">
+                    <tr><td colspan="6" class="empty">BILL IS EMPTY</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="billing-left-footer">
+                <span id="billItemCount">0 ITEMS</span>
+                <button id="removeSelectedButton" class="button-muted" type="button" onclick="window.removeSelectedCart()">REMOVE SELECTED [DELETE]</button>
+                <button id="clearCartButton" class="button-warning" type="button" onclick="window.clearCart()" style="margin-left:8px;">CLEAR BILL [<span class="key-lbl-clearCart">ALT+C</span>]</button>
+              </div>
+            </div>
+
+            <div class="panel billing-right">
+              <h3>PAYMENT DETAILS</h3>
+              <label>CUSTOMER TYPE</label>
+              <select id="customerType" onchange="window.toggleCustomerType()">
+                <option value="WALKING">WALKING CUSTOMER</option>
+                <option value="KHATA">KHATA CUSTOMER</option>
+              </select>
+
+              <div id="khataCustomerFields" class="khata-fields hidden">
+                <label>ENTER CUSTOMER CODE OR NAME</label>
+                <input id="khataCustomerCode" placeholder="ENTER CUSTOMER CODE OR NAME" autocomplete="off" oninput="window.updateBillingTotals()">
+                <p id="khataCustomerMatch" class="muted" style="margin-top:5px; font-weight:bold;"></p>
+              </div>
+
+              <div class="amount-list">
+                <div><span>CURRENT BILL (SUBTOTAL)</span><strong id="currentBillAmount">RS. 0.00</strong></div>
+                <div><span>PREVIOUS BALANCE</span><strong id="previousBalanceAmount">RS. 0.00</strong></div>
+              </div>
+
+              <label>DISCOUNT (APPLIED TO CURRENT BILL ONLY)</label>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <input id="saleDiscount" type="number" min="0" step="0.01" value="0" oninput="window.updateBillingTotals()" style="flex:1;">
+                <button type="button" id="discountTypeToggle" onclick="window.toggleDiscountType()" style="padding:10px 14px; background:var(--red); font-weight:bold; min-width:55px;">RS</button>
+              </div>
+
+              <div class="net-payable"><span>NET PAYABLE</span><strong id="netPayableAmount">RS. 0.00</strong></div>
+
+              <label class="check-line">
+                <input id="includePreviousBalance" type="checkbox" checked onchange="window.updateBillingTotals()"> INCLUDE PREVIOUS BALANCE IN THIS PAYMENT
+              </label>
+
+              <label>PAYMENT METHOD</label>
+              <select id="paymentMethod">
+                <option>CASH</option>
+                <option>EASYPAISA</option>
+                <option>BANK</option>
+                <option>JAZZCASH</option>
+              </select>
+
+              <label>CASH RECEIVED</label>
+              <input id="cashReceived" type="number" min="0" step="0.01" placeholder="CASH RECEIVED" value="0" oninput="window.updateBillingTotals()">
+
+              <div class="amount-list payment-results">
+                <div><span>REMAINING DUE</span><strong id="remainingDueAmount">RS. 0.00</strong></div>
+                <div><span>CHANGE RETURN</span><strong id="changeReturnAmount">RS. 0.00</strong></div>
+              </div>
+
+              <button id="completeSaleButton" class="button-success complete-sale" type="button" onclick="window.completeSale()">COMPLETE SALE & RECEIPT [<span class="key-lbl-completeSale">ALT+S</span>]</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. DASHBOARD OVERVIEW -->
+        <section id="overviewPage" class="page-section hidden">
+          <div class="stats-grid">
+            <div class="stat-card"><span>TODAY'S SALES</span><strong id="todaySales">RS. 0.00</strong></div>
+            <div class="stat-card"><span>TODAY'S BILLS</span><strong id="todayTransactions">0</strong></div>
+            <div class="stat-card"><span>TOTAL PRODUCTS</span><strong id="totalProducts">0</strong></div>
+            <div class="stat-card"><span>TOTAL MARKET BALANCE (SUPPLIERS)</span><strong id="marketBalance">RS. 0.00</strong></div>
+            <div class="stat-card"><span>STORE STOCK</span><strong id="storeStock">0 PIECES</strong></div>
+            <div class="stat-card"><span>SHOP STOCK</span><strong id="shopStock">0 PIECES</strong></div>
+          </div>
+
+          <div class="panel" style="margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:15px;">
+              <h3>SALES OVERVIEW EXCEL SHEET & REPORT</h3>
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <label class="check-line" style="margin:0!important; cursor:pointer;">
+                  <input type="checkbox" id="toggleExcelView" onchange="window.renderDashboard()"> EXCEL TABLE VIEW
+                </label>
+                <select id="salesOverviewFilter" onchange="window.renderDashboard()" style="width:auto; padding:8px 12px;">
+                  <option value="today">TODAY'S SALES</option>
+                  <option value="weekly">WEEKLY SALES</option>
+                  <option value="monthly">MONTHLY SALES</option>
+                  <option value="custom">CUSTOM DATE RANGE</option>
+                </select>
+                <button type="button" class="button-success" onclick="window.printSalesOverviewSheet()" style="padding:8px 14px;">PRINT SHEET</button>
+              </div>
+            </div>
+
+            <div id="customDateFilterBox" class="hidden" style="display:flex; gap:10px; margin-bottom:15px;">
+              <div><label>FROM:</label><input type="date" id="overviewFromDate" onchange="window.renderDashboard()"></div>
+              <div><label>TO:</label><input type="date" id="overviewToDate" onchange="window.renderDashboard()"></div>
+            </div>
+
+            <div id="salesOverviewContainer"></div>
+          </div>
+
+          <div class="panel">
+            <h3>RECENT TRANSACTIONS</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>INVOICE #</th><th>DATE</th><th>CASHIER</th><th>LOCATION</th><th>TOTAL</th><th>ACTION</th></tr></thead>
+                <tbody id="recentTransactions"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. STOCK MANAGEMENT -->
+        <section id="stockPage" class="page-section hidden">
+          <div class="panel">
+            <h3>ADD PRODUCT / RECEIVE STOCK</h3>
+            <form id="productForm" onsubmit="window.handleProductSubmit(event)">
+              <div class="form-grid">
+                <div><label>PRODUCT NAME</label><input id="productName" required></div>
+                <div><label>MODEL</label><input id="productModel" required></div>
+                <div>
+                  <label>COMPANY</label>
+                  <input id="productCompany" list="companySuggestions" placeholder="E.G. LOGITECH / FASTER" oninput="window.suggestProductBarcode()">
+                  <datalist id="companySuggestions"></datalist>
+                </div>
+                <div>
+                  <label>BARCODE / QR CODE (AUTO GENERATED)</label>
+                  <input id="productBarcode" placeholder="AUTO GENERATED (E.G. L1001) OR SCAN" oninput="this.dataset.manual='1'">
+                </div>
+                <div>
+                  <label>CATEGORY</label>
+                  <select id="productCategory">
+                    <option>HEADPHONE</option><option>SPEAKER</option><option>MINI SPEAKER</option><option>CABLE</option><option>CHARGER</option><option>OTHER</option>
+                  </select>
+                </div>
+                <div>
+                  <label>SUPPLIER (SELECT OR TYPE)</label>
+                  <select id="productSupplierSelect" onchange="window.onSupplierSelectChange()" style="margin-bottom:6px;">
+                    <option value="">-- SELECT SUPPLIER --</option>
+                  </select>
+                  <input id="productSeller" list="supplierSuggestions" placeholder="OR ENTER NEW SUPPLIER NAME">
+                  <datalist id="supplierSuggestions"></datalist>
+                </div>
+                <div><label>LOCATION</label><select id="productLocation"><option value="STORE">STORE / GODOWN</option><option value="SHOP">SHOP</option></select></div>
+                <div><label>QUANTITY</label><input id="productQuantity" type="number" min="1" required value="1"></div>
+                <div><label>PURCHASE COST (PER UNIT)</label><input id="purchaseCost" type="number" min="0" step="0.01" required value="0"></div>
+                <div><label>PAID TO SUPPLIER NOW (PKR)</label><input id="supplierPaidNow" type="number" min="0" step="0.01" value="0"></div>
+                <div><label>SALE PRICE</label><input id="salePrice" type="number" min="0" step="0.01" required value="0"></div>
+                <div><label>KATA / ADJUSTMENT</label><input id="productKata" type="number" min="0" step="0.01" value="0"></div>
+                <div><label>BILTY / TRANSPORT EXPENSE</label><input id="productTransport" type="number" min="0" step="0.01" value="0"></div>
+                <div><label>RECEIVING DATE</label><input id="productDate" type="date"></div>
+              </div>
+              <button type="submit">SAVE PRODUCT & RECEIVE STOCK</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h3>PRODUCT-WISE STOCK LIST</h3>
+            <input id="productSearchInput" placeholder="SEARCH NAME, MODEL, COMPANY..." class="search-input" oninput="window.renderProducts()">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>PRODUCT</th><th>MODEL</th><th>COMPANY</th><th>BARCODE</th><th>CATEGORY</th><th>STORE</th><th>SHOP</th><th>TOTAL</th><th>COST PRICE</th><th>SALE PRICE</th></tr>
+                </thead>
+                <tbody id="productTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. STOCK INVENTORY -->
+        <section id="inventoryPage" class="page-section hidden">
+          <div class="panel">
+            <h3>STOCK INVENTORY BY COMPANY</h3>
+            <div id="companyInventoryButtons" class="form-grid"></div>
+            <div id="companyInventoryDetails" style="margin-top:20px;"></div>
+          </div>
+        </section>
+
+        <!-- 5. STOCK RECEIVING -->
+        <section id="receivingPage" class="page-section hidden">
+          <div class="panel">
+            <h3>ALL STOCK RECEIVING BATCHES HISTORY</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>BATCH ID</th><th>DATE</th><th>PRODUCT</th><th>SUPPLIER</th><th>LOCATION</th><th>QTY</th><th>UNIT COST</th><th>TOTAL COST</th><th>PAID NOW</th><th>KATA</th><th>BILTY</th></tr>
+                </thead>
+                <tbody id="receivingTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. STOCK TRANSFER -->
+        <section id="transferPage" class="page-section hidden">
+          <div class="panel">
+            <h3>TRANSFER STOCK BETWEEN STORE & SHOP</h3>
+            <form id="transferForm" onsubmit="window.handleTransferSubmit(event)">
+              <div class="form-grid">
+                <div><label>SELECT PRODUCT</label><select id="transferProductSelect" required></select></div>
+                <div><label>FROM LOCATION</label><select id="transferFrom" required><option value="STORE">STORE / GODOWN</option><option value="SHOP">SHOP</option></select></div>
+                <div><label>TO LOCATION</label><select id="transferTo" required><option value="SHOP">SHOP</option><option value="STORE">STORE / GODOWN</option></select></div>
+                <div><label>TRANSFER QUANTITY</label><input id="transferQty" type="number" min="1" required value="1"></div>
+              </div>
+              <button type="submit" class="button-success">EXECUTE STOCK TRANSFER</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>STOCK TRANSFER HISTORY</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>DATE & TIME</th><th>PRODUCT</th><th>MODEL</th><th>QTY</th><th>FROM</th><th>TO</th></tr></thead>
+                <tbody id="transferTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. TRANSACTIONS PAGE -->
+        <section id="transactionsPage" class="page-section hidden">
+          <div class="panel">
+            <h3>SALES TRANSACTIONS HISTORY</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>INVOICE #</th><th>DATE</th><th>TIME</th><th>CUSTOMER</th><th>ITEMS</th><th>CASHIER</th><th>LOCATION</th><th>TOTAL</th><th>ACTION</th></tr>
+                </thead>
+                <tbody id="transactionsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. DUPLICATE BILL PAGE -->
+        <section id="duplicateBillPage" class="page-section hidden">
+          <div class="panel">
+            <h3>DUPLICATE BILL & PRINTING</h3>
+            <div class="form-grid" style="grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:20px;">
+              <div><label>INVOICE #:</label><input id="dupBillNo" placeholder="SEARCH INVOICE #" oninput="window.renderDuplicateBills()"></div>
+              <div><label>CUSTOMER:</label><input id="dupCustomer" placeholder="SEARCH CUSTOMER" oninput="window.renderDuplicateBills()"></div>
+              <div><label>FROM:</label><input type="date" id="dupFrom" onchange="window.renderDuplicateBills()"></div>
+              <div><label>TO:</label><input type="date" id="dupTo" onchange="window.renderDuplicateBills()"></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>INVOICE #</th><th>CUSTOMER</th><th>TOTAL PRICE</th><th>PAID</th><th>DISCOUNT</th><th>DATE</th><th>ACTION</th></tr>
+                </thead>
+                <tbody id="duplicateBillTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. CUSTOMER KHATA -->
+        <section id="khataPage" class="page-section hidden">
+          <div class="panel">
+            <h3 id="customerFormTitle">ADD NEW KHATA CUSTOMER</h3>
+            <form id="customerForm" onsubmit="window.handleCustomerSubmit(event)">
+              <input type="hidden" id="editingCustomerId" value="">
+              <div class="form-grid">
+                <div><label>CUSTOMER CODE</label><input id="customerBarcode" placeholder="C1001" readonly></div>
+                <div><label>FULL NAME</label><input id="customerName" required></div>
+                <div><label>CAST</label><input id="customerCast"></div>
+                <div><label>ADDRESS</label><input id="customerAddress"></div>
+                <div><label>PHONE</label><input id="customerPhone"></div>
+                <div><label>OPENING BALANCE</label><input id="customerBalance" type="number" value="0"></div>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <button type="submit" id="btnSaveCustomer">ADD KHATA CUSTOMER</button>
+                <button type="button" id="btnCancelEditCustomer" class="button-muted hidden" onclick="window.cancelEditCustomer()">CANCEL EDIT</button>
+              </div>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>CUSTOMER KHATA RECORDS</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>CODE</th><th>NAME</th><th>CAST</th><th>ADDRESS</th><th>PHONE</th><th>CURRENT BALANCE</th><th>ACTION</th></tr>
+                </thead>
+                <tbody id="customerTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 10. SALES RETURN -->
+        <section id="returnsPage" class="page-section hidden">
+          <div class="panel">
+            <h3>SALES RETURN</h3>
+            <label>ORIGINAL INVOICE NUMBER</label>
+            <div class="billing-search-row">
+              <input id="returnInvoiceSearch" placeholder="ENTER INVOICE NUMBER (E.G. INV-000001)" autocomplete="off">
+              <button type="button" id="findInvoiceButton" onclick="window.findInvoiceForReturn()">FIND INVOICE</button>
+            </div>
+            <div id="returnInvoiceDetailsArea"></div>
+          </div>
+
+          <div class="panel" style="margin-top:20px;">
+            <h3>SALES RETURN HISTORY RECORDS</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>RETURN ID</th><th>INVOICE #</th><th>DATE</th><th>CUSTOMER</th><th>REFUND AMOUNT</th></tr></thead>
+                <tbody id="returnsHistoryTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 11. CUSTOMER HISTORY PAGE -->
+        <section id="customerHistoryPage" class="page-section hidden">
+          <div class="panel">
+            <h3>CUSTOMER TRANSACTION & KHATA HISTORY</h3>
+            <label>ENTER CUSTOMER CODE OR NAME</label>
+            <div class="billing-search-row">
+              <input id="historyCustomerCode" placeholder="ENTER CUSTOMER CODE OR NAME" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.renderCustomerHistory();}">
+              <button id="btnViewCustHistory" type="button" onclick="window.renderCustomerHistory()">VIEW HISTORY</button>
+            </div>
+            <div id="customerHistoryResults"></div>
+          </div>
+        </section>
+
+        <!-- 12. DAILY EXPENSES -->
+        <section id="expensesPage" class="page-section hidden">
+          <div class="panel">
+            <h3>ADD DAILY EXPENSE</h3>
+            <form id="expenseForm" onsubmit="window.handleExpenseSubmit(event)">
+              <div class="form-grid">
+                <div><label>DESCRIPTION</label><input id="expenseDescription" required></div>
+                <div><label>AMOUNT</label><input id="expenseAmount" type="number" min="0" required></div>
+                <div><label>DATE</label><input id="expenseDate" type="date"></div>
+              </div>
+              <button type="submit">SAVE EXPENSE</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>EXPENSE HISTORY RECORDS</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>AMOUNT</th></tr></thead>
+                <tbody id="expenseTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 13. SUPPLIERS PAGE WITH PAYMENT RECORDS AND PRINT BUTTON -->
+        <section id="suppliersPage" class="page-section hidden">
+          <div class="panel">
+            <h3 id="supplierFormTitle">ADD NEW SUPPLIER</h3>
+            <form id="supplierForm" onsubmit="window.handleSupplierSubmit(event)">
+              <input type="hidden" id="editingSupplierId" value="">
+              <div class="form-grid">
+                <div><label>SUPPLIER NAME</label><input id="supplierName" required></div>
+                <div><label>CAST</label><input id="supplierCaste"></div>
+                <div><label>ADDRESS</label><input id="supplierAddress"></div>
+                <div>
+                  <label>COMPANY (SELECT OR TYPE)</label>
+                  <select id="supplierCompanySelect" onchange="window.onSupplierCompanyDropdownChange()" style="margin-bottom:6px;">
+                    <option value="">-- SELECT COMPANY --</option>
+                  </select>
+                  <input id="supplierCompany" list="companySuggestionsList" placeholder="OR ENTER NEW COMPANY">
+                  <datalist id="companySuggestionsList"></datalist>
+                </div>
+                <div><label>PHONE</label><input id="supplierPhone"></div>
+                <div><label>OPENING BALANCE (PKR)</label><input id="supplierOpeningBalance" type="number" step="0.01" value="0"></div>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <button type="submit" id="btnSaveSupplier">SAVE SUPPLIER</button>
+                <button type="button" id="btnCancelEditSupplier" class="button-muted hidden" onclick="window.cancelEditSupplier()">CANCEL EDIT</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h3>RECORD SUPPLIER PAYMENT</h3>
+            <form id="supplierPaymentForm" onsubmit="window.handleSupplierPaymentSubmit(event)">
+              <div class="form-grid">
+                <div><label>SELECT SUPPLIER</label><select id="supplierPaymentSelect" required></select></div>
+                <div><label>PAYMENT AMOUNT (PKR)</label><input id="supplierPaymentAmount" type="number" min="0.01" step="0.01" required></div>
+                <div><label>PAYMENT DATE</label><input id="supplierPaymentDate" type="date"></div>
+                <div><label>PAYMENT METHOD</label><select id="supplierPaymentMethod"><option>CASH</option><option>BANK</option><option>EASYPAISA</option><option>JAZZCASH</option></select></div>
+              </div>
+              <button type="submit" class="button-success">RECORD CASH PAYMENT</button>
+            </form>
+
+            <h4 style="margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">SUPPLIER PAYMENT RECORDS LOG</h4>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>SUPPLIER NAME</th>
+                    <th>AMOUNT PAID</th>
+                    <th>PAYMENT METHOD</th>
+                    <th>TIME & DATE</th>
+                  </tr>
+                </thead>
+                <tbody id="supplierPaymentRecordsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+              <h3>SUPPLIERS LIST & MARKET BALANCE</h3>
+              <button type="button" class="button-success" onclick="window.printSuppliersListReport()">PRINT SUPPLIERS LIST</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>SUPPLIER NAME</th><th>CAST</th><th>ADDRESS</th><th>COMPANY</th><th>PHONE</th><th>PAYABLE BALANCE</th><th>ACTION</th></tr></thead>
+                <tbody id="supplierTableBody"></tbody>
+              </table>
+            </div>
+            <h3 id="supplierMarketBalance" style="margin-top:15px; color:#ff6b6b;">TOTAL MARKET BALANCE: RS. 0.00</h3>
+          </div>
+        </section>
+
+        <!-- 14. REPORTS CENTER WITH SUPPLIER DETAIL LEDGER REPORT -->
+        <section id="reportsPage" class="page-section hidden">
+          <div class="panel">
+            <h3>REPORTS CENTER</h3>
+            <div class="form-grid">
+              <div>
+                <label>REPORT TYPE</label>
+                <select id="reportType">
+                  <option value="sales">SALES SUMMARY REPORT</option>
+                  <option value="supplierDetails">SUPPLIER INDIVIDUAL HISTORY & LEDGER REPORT</option>
+                  <option value="stock">STOCK REPORT</option>
+                </select>
+              </div>
+              <div>
+                <label>FILTER BY SUPPLIER NAME</label>
+                <select id="reportSupplierSelect">
+                  <option value="">-- ALL SUPPLIERS --</option>
+                </select>
+              </div>
+              <div>
+                <label>FILTER BY COMPANY</label>
+                <select id="reportSupplierCompanySelect">
+                  <option value="">-- ALL COMPANIES --</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" id="viewReportButton" onclick="window.renderReports()">VIEW REPORT</button>
+            <div id="reportOutput" style="margin-top:20px;"></div>
+          </div>
+        </section>
+
+        <!-- 15. USERS MANAGEMENT -->
+        <section id="usersPage" class="page-section hidden">
+          <div class="panel">
+            <h3>CREATE NEW USER ACCOUNT</h3>
+            <form id="userForm" onsubmit="window.handleUserSubmit(event)">
+              <div class="form-grid">
+                <div><label>USERNAME</label><input id="newUsername" required></div>
+                <div><label>PASSWORD</label><input id="newUserPassword" type="password" required></div>
+                <div><label>ROLE</label><select id="newUserRole"><option value="CASHIER">CASHIER</option><option value="ADMIN">ADMIN</option></select></div>
+              </div>
+              <button type="submit">CREATE USER</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>USER ACCOUNTS LIST</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>USERNAME</th><th>ROLE</th></tr></thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 16. BACKUP & RESTORE -->
+        <section id="backupPage" class="page-section hidden">
+          <div class="panel">
+            <h3>DATABASE BACKUP & RESTORE</h3>
+            <p class="muted">SYSTEM AUTO-SAVES TO LOCALSTORAGE. YOU CAN ALSO EXPORT A BACKUP FILE ANYTIME.</p>
+            <button type="button" id="btnExportDbMain" class="button-success" onclick="window.exportBackup()">DOWNLOAD BACKUP DATA (.JSON)</button>
+            <hr>
+            <label>RESTORE DATA FROM FILE (.JSON)</label>
+            <input id="restoreFile" type="file" accept=".json">
+            <button type="button" id="btnRestoreDb" class="button-warning" onclick="window.restoreBackup()" style="margin-top:10px;">RESTORE BACKUP FILE</button>
+          </div>
+        </section>
+
+        <!-- 17. SETTINGS & RECEIPT ADDRESS EDITING -->
+        <section id="settingsPage" class="page-section hidden">
+          <div class="panel">
+            <h3>BUSINESS & RECEIPT SETTINGS</h3>
+            <div class="form-grid">
+              <div><label>BUSINESS NAME (TOP HEADER)</label><input id="settingBusinessName" value="DELUXE POS"></div>
+              <div><label>BUSINESS SUB-TITLE</label><input id="settingBusinessSub" value="DELUXE COMPUTER SPEAKERS & ACCESSORIES"></div>
+              <div><label>RECEIPT ADDRESS (FOOTER)</label><input id="settingReceiptAddress" value="NEAR CLOCK TOWER NEAM KE CHARI SHOP NO#38 SUKKUR"></div>
+              <div><label>RECEIPT FOOTER TEXT</label><input id="settingReceiptFooter" value="THANK YOU COME AGAIN !"></div>
+            </div>
+            <button type="button" id="btnSaveBusinessSettings" onclick="window.saveBusinessSettings()">SAVE BUSINESS SETTINGS</button>
+            <hr style="margin:25px 0;">
+            <button type="button" class="button-warning" onclick="window.resetPOSSystem()" style="background:var(--red);">RESET POS SYSTEM DATA</button>
+          </div>
+
+          <div class="panel">
+            <h3>CUSTOMIZE SHORTCUT KEYS (SETTINGS)</h3>
+            <p class="muted">CHOOSE YOUR PREFERRED KEYBOARD SHORTCUTS FOR FAST POS OPERATIONAL ACTIONS.</p>
+            <div class="form-grid">
+              <div>
+                <label>NEW SALE / BILLING PAGE</label>
+                <select id="keySale">
+                  <option value="F1">F1</option><option value="F2">F2</option><option value="F3">F3</option><option value="F4">F4</option><option value="F6">F6</option><option value="F7">F7</option><option value="F9">F9</option>
+                </select>
+              </div>
+              <div>
+                <label>SALES RETURN PAGE</label>
+                <select id="keyReturns">
+                  <option value="F2">F2</option><option value="F1">F1</option><option value="F3">F3</option><option value="F4">F4</option><option value="F6">F6</option><option value="F7">F7</option>
+                </select>
+              </div>
+              <div>
+                <label>CUSTOMER HISTORY PAGE</label>
+                <select id="keyCustomerHistory">
+                  <option value="F3">F3</option><option value="F1">F1</option><option value="F2">F2</option><option value="F4">F4</option><option value="F6">F6</option><option value="F7">F7</option>
+                </select>
+              </div>
+              <div>
+                <label>TRANSACTIONS PAGE</label>
+                <select id="keyTransactions">
+                  <option value="F4">F4</option><option value="F1">F1</option><option value="F2">F2</option><option value="F3">F3</option><option value="F6">F6</option><option value="F7">F7</option>
+                </select>
+              </div>
+              <div>
+                <label>DUPLICATE BILL PAGE</label>
+                <select id="keyDuplicateBill">
+                  <option value="F5">F5</option><option value="F1">F1</option><option value="F2">F2</option><option value="F3">F3</option><option value="F4">F4</option><option value="F6">F6</option>
+                </select>
+              </div>
+              <div>
+                <label>FOCUS BARCODE SEARCH</label>
+                <select id="keyFocusSearch">
+                  <option value="F8">F8</option><option value="F9">F9</option><option value="F10">F10</option>
+                </select>
+              </div>
+              <div>
+                <label>COMPLETE SALE KEY</label>
+                <select id="keyCompleteSale">
+                  <option value="ALT+S">ALT + S</option><option value="ALT+P">ALT + P</option><option value="F12">F12</option>
+                </select>
+              </div>
+              <div>
+                <label>CLEAR BILL KEY</label>
+                <select id="keyClearCart">
+                  <option value="ALT+C">ALT + C</option><option value="ALT+X">ALT + X</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" id="btnSaveShortcuts" class="button-success" onclick="window.saveShortcutsConfig()">SAVE SHORTCUT KEYS CONFIGURATION</button>
+          </div>
+        </section>
+
+        <!-- 18. CHANGE PASSWORD -->
+        <section id="passwordPage" class="page-section hidden">
+          <div class="panel narrow">
+            <h3>CHANGE ACCOUNT PASSWORD</h3>
+            <form id="passwordForm" onsubmit="window.handlePasswordSubmit(event)">
+              <label>CURRENT PASSWORD</label><input id="oldPassword" type="password" required>
+              <label>NEW PASSWORD</label><input id="newPassword" type="password" required>
+              <button type="submit" style="margin-top:15px;">UPDATE PASSWORD</button>
+            </form>
+          </div>
+        </section>
+      </div>
+      <footer>DELUXEPOS PRO HARDENED REAL-TIME ENGINE</footer>
+    </main>
+  </div>
+  <div id="toast" class="toast"></div>
+</body>
+</html>

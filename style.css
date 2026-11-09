@@ -1,0 +1,123 @@
+/* DeluxePOS - Red / Black / Silver theme */
+:root{--red:#d71920;--red-dark:#a90f16;--black:#151515;--panel:#202020;--silver:#b9bec5;--muted:#9299a2;--bg:#111315;--line:#353a40;--white:#f5f6f7;--green:#16864a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,Helvetica,sans-serif;font-size:14px}
+button,input,select{font:inherit}
+button{border:0;border-radius:7px;padding:11px 16px;background:var(--red);color:white;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{background:var(--red-dark);transform:translateY(-1px)}
+input,select{width:100%;padding:11px 12px;border:1px solid #444b53;border-radius:7px;background:#151719;color:#fff;outline:none}
+input:focus,select:focus{border-color:var(--red);box-shadow:0 0 0 2px #d7192028}
+label{display:block;margin:0 0 7px;color:#c5c9ce;font-size:12px;font-weight:700}
+h1,h2,h3,h4,p{margin-top:0}h1{font-size:28px;margin-bottom:8px}h2{font-size:23px;margin:4px 0 0}h3{font-size:17px;margin-bottom:18px}
+hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+.hidden{display:none!important}.muted,.note{color:var(--muted);font-size:12px}.error{color:#ff7777;min-height:16px}.screen{min-height:100vh}
+.center-screen{display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 20%,#343434,#111 65%)}
+.login-card{width:min(420px,100%);padding:34px;background:#202020;border:1px solid #444;border-top:4px solid var(--red);border-radius:14px;box-shadow:0 20px 70px #0009}
+.login-card label{margin-top:14px}.login-card button{width:100%;margin-top:16px}
+.brand-mark{height:58px;width:58px;border-radius:12px;background:var(--red);display:grid;place-items:center;font-size:32px;font-weight:900;margin-bottom:16px}
+.location-buttons{display:grid;gap:12px;margin-top:25px}.button-muted{background:#454545}.button-success{background:var(--green)}.button-warning{background:#a66a10}
+.app-shell{min-height:100vh;display:flex}
+.sidebar{width:250px;flex:0 0 250px;background:#191a1c;border-right:1px solid var(--line);padding:20px 13px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:11px;padding:0 8px 20px;border-bottom:1px solid var(--line)}.brand b{display:block;font-size:17px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px;margin-top:4px}
+.small-mark{width:38px;height:38px;font-size:21px;margin:0}
+.user-info{padding:17px 9px;border-bottom:1px solid var(--line)}.user-info b,.user-info small{display:block}.user-info small{color:var(--muted);margin-top:5px;font-size:11px}
+nav{display:grid;gap:5px;margin-top:15px}
+.nav-link{background:transparent;color:#c5c9ce;text-align:left;font-weight:500;padding:11px 12px;border-radius:7px}
+.nav-link:hover,.nav-link.active{background:#3b2022;color:#fff}
+.logout-button{margin-top:auto;background:#343434}
+.main{min-width:0;flex:1;display:flex;flex-direction:column}
+.topbar{padding:22px 28px;background:#1b1d1f;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.eyebrow{font-size:10px;letter-spacing:2px;color:var(--muted)}
+.location-pill{background:#3b2022;color:#ffb8ba;border:1px solid #713238;border-radius:30px;padding:9px 15px;font-weight:700}
+.page{padding:25px 28px;flex:1;min-width:0}
+.page-section{display:block}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:22px;margin-bottom:20px;min-width:0}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:17px}
+.form-grid>div{min-width:0}
+.panel form button,.panel>button{margin-top:4px}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th,td{text-align:left;padding:12px 11px;border-bottom:1px solid var(--line);font-size:12px}
+th{color:#e7a3a5;background:#292b2e;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+td{color:#e2e4e7}
+tbody tr:hover{background:#292b2e}
+.empty{text-align:center;color:var(--muted);padding:25px}
+.search-input{max-width:350px;margin-bottom:15px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:20px}
+.stat-card{background:linear-gradient(135deg,#252729,#1b1c1e);border:1px solid var(--line);border-left:3px solid var(--red);padding:20px;border-radius:10px}
+.stat-card span{display:block;color:var(--muted);font-size:12px}
+.stat-card strong{display:block;font-size:23px;margin-top:10px}
+.bill-bottom{display:flex;align-items:end;gap:18px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}
+.bill-bottom label{width:130px}.bill-bottom strong{font-size:19px;margin-bottom:10px}.bill-bottom button{margin:0}
+.narrow{max-width:480px}.narrow input{margin-bottom:15px}
+.toast{position:fixed;right:22px;bottom:22px;background:#187c49;color:white;padding:13px 18px;border-radius:8px;box-shadow:0 5px 25px #0008;opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s;z-index:1000}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.error-toast{background:#b51e26}
+.product-card{margin-top:20px;padding:17px;border:1px solid var(--line);border-radius:9px}
+.stock-location{display:flex;gap:12px}
+.stock-box{flex:1;background:#17191b;padding:14px;border-radius:8px}
+.stock-box span,.stock-box strong{display:block}.stock-box span{color:var(--muted);font-size:11px}.stock-box strong{font-size:23px;margin-top:7px}
+
+/* THERMAL RECEIPT AUTO HEIGHT FIT (80mm x 80mm & 80mm x 230mm) */
+.receipt-preview{background:white;color:#000;padding:8px;margin:0 auto;font-family:Consolas,"Courier New",monospace;font-size:10px;line-height:1.3;width:76mm;max-width:80mm;min-height:auto;height:auto;}
+.receipt-preview h2{font-size:15px;text-align:center;margin:0 0 2px 0;font-weight:bold;}
+.receipt-preview p{margin:2px 0;font-size:10px;}
+.receipt-preview table{width:100%;border-collapse:collapse;margin:5px 0;}
+.receipt-preview th,.receipt-preview td{color:#000;background:white;padding:3px 0;font-size:9px;border:none;}
+.receipt-divider{border-top:1px dashed #000;margin:6px 0;}
+
+footer{padding:13px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+@media(max-width:900px){.sidebar{width:210px;flex-basis:210px}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.page{padding:18px}.topbar{padding:18px}}
+@media(max-width:650px){.app-shell{display:block}.sidebar{width:100%;padding:12px}.brand{padding-bottom:10px}.user-info{padding:10px}.sidebar nav{grid-template-columns:repeat(2,minmax(0,1fr));max-height:210px;overflow:auto}.logout-button{margin-top:10px}.topbar{padding:15px}.page{padding:12px}.form-grid,.stats-grid{grid-template-columns:1fr}.panel{padding:15px}.bill-bottom{justify-content:flex-start}}
+
+@media print{
+  body{background:white!important;color:black!important}
+  body *{visibility:hidden!important}
+  #receiptPrintContainer,#receiptPrintContainer *{visibility:visible!important}
+  #receiptPrintContainer{display:block!important;position:absolute;left:0;top:0;width:80mm!important;margin:0;padding:0;background:white;color:black}
+  .receipt-preview{width:80mm!important;max-width:80mm!important;padding:2mm!important;margin:0 auto;box-shadow:none;border:0}
+  @page{margin:0;size:80mm auto;}
+}
+
+/* Two-column billing layout */
+.billing-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,.85fr);gap:18px;align-items:start}
+.billing-layout .panel{margin:0;padding:20px}
+.billing-left h3,.billing-right h3{padding-bottom:13px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.billing-search-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin:8px 0 18px}
+.billing-search-row button{white-space:nowrap}
+.billing-table{min-height:230px}.billing-table table{min-width:620px}.billing-table th,.billing-table td{padding:14px 10px}
+.cart-select-row{cursor:pointer}
+.cart-select-row.selected{background:#552326!important;outline:1px solid var(--red)}
+.cart-select-row small{display:block;color:var(--muted);margin-top:4px}
+.billing-left-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;color:var(--muted);font-size:12px}
+.billing-left-footer button{margin:0}
+.billing-right>label{margin-top:13px}
+.khata-fields{margin-top:15px;padding:14px;background:#191b1d;border:1px solid var(--line);border-radius:8px}
+.khata-fields>label{margin-top:0}
+.khata-form-grid{grid-template-columns:1fr 1fr;margin:12px 0 0;gap:10px}
+.khata-form-grid>div:last-child{grid-column:1/-1}
+.amount-list{margin:16px 0 8px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.amount-list>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px;background:#191b1d;border-bottom:1px solid var(--line)}
+.amount-list>div:last-child{border-bottom:0}
+.amount-list span,.net-payable span{font-size:11px;letter-spacing:.5px;color:#c0c4c9;font-weight:700}
+.amount-list strong{font-size:15px;font-variant-numeric:tabular-nums}
+.net-payable{display:flex;align-items:center;justify-content:space-between;padding:16px;margin:12px 0;background:#3b2022;border:1px solid #743238;border-radius:8px}
+.net-payable strong{font-size:22px;color:#fff}
+.check-line{display:flex;align-items:center;gap:9px;margin:14px 0!important;font-weight:500!important}
+.check-line input{width:17px;height:17px;accent-color:var(--red)}
+.payment-results{margin-top:15px}
+.payment-results>div:first-child strong{color:#ffb4b4}
+.payment-results>div:last-child strong{color:#8ee0ad}
+.walking-warning{padding:11px;background:#4b171b;border:1px solid #a9323a;color:#ffb9bd;border-radius:7px;font-size:12px;line-height:1.5}
+.complete-sale{width:100%;margin-top:15px!important;padding:15px}
+.complete-sale:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.category-row{display:grid;grid-template-columns:1fr 1fr auto;gap:6px}
+.category-row button{padding:8px 10px}
+
+.product-search-results{display:grid;gap:7px;margin:-8px 0 14px}
+.product-result{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 12px;background:#292b2e;border:1px solid var(--line);text-align:left}
+.product-result span{display:grid;gap:4px;min-width:0}
+.product-result small{color:var(--muted);font-size:11px;font-weight:400}
+.product-result strong{white-space:nowrap}
+.product-result em{font-style:normal;color:#ffb8ba;font-size:10px}
+.product-result:hover{background:#3b2022}
+.font-balance-red{color:#ff6b6b;font-weight:bold;}
